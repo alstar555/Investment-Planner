@@ -247,6 +247,24 @@
             color: #6a8a7e;
         }
 
+        .switch {
+            display: inline-flex;
+            align-items: center; Aligns checkbox with label
+            color: #6a8a7e;
+            font-size: 10px;
+        }
+        
+        .switch input[type="checkbox"] {
+            accent-color: #6a8a7e; /* Changes the check mark color to green */
+        }
+
+        .slider {
+            margin-left: 50px;     /* Adds spacing between checkbox and label */
+            color: #6a8a7e;
+            padding: 4px;
+        }
+
+
      
 
         
@@ -308,8 +326,14 @@
                     <input type="number" id="goal" value="300000">
                 </div>
             </div>
-            <button class="button" onclick="updateCalculations()" id="updateButton">Update</button>
 
+            
+            <button class="button" onclick="updateCalculations()" id="updateButton">Update</button>
+            
+            <label class="switch">
+                <span class="slider">Adjust for Inflation 3%</span>
+                <input type="checkbox" id="inflationToggle">
+            </label>
 
         </div>
 
@@ -335,9 +359,14 @@
             </p>
           </div>
         </div>
-
-        </div>
-
+        
+    </div>
+    
+    <!-- Pie Chart Section -->
+       <div class="card chart-container" style="width: 190px; height: 225px;">
+       <div class="card-title">Monthly Breakdown</div>
+       <canvas id="incomePieChart"></canvas>
+    </div>
 
          <!-- Yearly Progress and Chart Section -->
         <div class="side-by-side" id="widgets">
@@ -352,12 +381,14 @@
                 <div class="card-title">Balance</div>
                 <canvas id="balanceChart"></canvas>
             </div>
+
+            
         </div>
-
-
+        
+        
         <!-- Results Section -->
         <div class="cards-grid">
-
+            
             <div class="card">
                 <div class="card-title">
                     <svg class="icon" viewBox="0 0 24 24">
@@ -411,6 +442,9 @@
     </div>
 
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
     <script>
 
 
@@ -432,6 +466,8 @@
         document.addEventListener('DOMContentLoaded', () => {
     loadSavedInputs(); // Load saved values on page load
 });
+
+
 
 // Function to save inputs in localStorage
 function saveInputs() {
@@ -471,54 +507,70 @@ function loadSavedInputs() {
 document.querySelectorAll('.input-group input').forEach(input => {
     input.addEventListener('input', saveInputs);
 });
-        let chart;
 
-        // Function to update calculations based on user input
-        function updateCalculations() {
-    // Get user inputs
-    const hourlyWage = parseFloat(document.getElementById('hourlyWage').value) || 0;
-    const hoursPerWeek = parseFloat(document.getElementById('hoursPerWeek').value) || 0;
-    const monthly401k = parseFloat(document.getElementById('monthly401k').value) || 0;
-    const yearlyRothIra = parseFloat(document.getElementById('yearlyRothIra').value) || 0;
-    const monthlyRent = parseFloat(document.getElementById('monthlyRent').value) || 0;
-    const monthlyExtra = parseFloat(document.getElementById('monthlyExtra').value) || 0;
-    const currentBalance = parseFloat(document.getElementById('currentBalanceInput').value) || 0;
-    const annualReturn = parseFloat(document.getElementById('annualReturn').value) || 0;
-    const stateTaxRate = parseFloat(document.getElementById('stateTaxRate').value) || 0;
-    const goal = parseFloat(document.getElementById('goal').value) || 0;
+    let chart;
+
+    // Function to calculate federal tax rate based on income brackets
+    function calculateFederalTaxRate(annualIncome) {
+        if (annualIncome <= 11000) return 0.10;
+        if (annualIncome <= 44725) return 0.12;
+        if (annualIncome <= 95375) return 0.22;
+        if (annualIncome <= 182100) return 0.24;
+        if (annualIncome <= 231250) return 0.32;
+        if (annualIncome <= 578125) return 0.35;
+        return 0.37; // For income above $578,125
+    }
+
 
     function showNotification(message) {
-        const notificationElement = document.getElementById('notification');
-        notificationElement.textContent = message;
-        notificationElement.classList.add('visible'); // Add class to make it visible
+            const notificationElement = document.getElementById('notification');
+            notificationElement.textContent = message;
+            notificationElement.classList.add('visible'); // Add class to make it visible
 
-        // Add close button
-        const closeButton = document.createElement('span');
-        closeButton.textContent = '×'; // "X" symbol
-        closeButton.className = 'close';
-        closeButton.onclick = () => {
-            notificationElement.classList.remove('visible'); // Hide notification when clicked
-        };
+            // Add close button
+            const closeButton = document.createElement('span');
+            closeButton.textContent = '×'; // "X" symbol
+            closeButton.className = 'close';
+            closeButton.onclick = () => {
+                notificationElement.classList.remove('visible'); // Hide notification when clicked
+            };
 
-        notificationElement.appendChild(closeButton); // Append the close button
+            notificationElement.appendChild(closeButton); // Append the close button
 
-        // Optionally, hide the notification after a few seconds
-        setTimeout(() => {
-            notificationElement.classList.remove('visible');
-        }, 50000); // Hide after 5 seconds
-    }
+            // Optionally, hide the notification after a few seconds
+            setTimeout(() => {
+                notificationElement.classList.remove('visible');
+            }, 50000); // Hide after 5 seconds
+        }
+
+    // Function to update calculations based on user input
+    function updateCalculations() {
+        // Get user inputs
+        const hourlyWage = parseFloat(document.getElementById('hourlyWage').value) || 0;
+        const hoursPerWeek = parseFloat(document.getElementById('hoursPerWeek').value) || 0;
+        const monthly401k = parseFloat(document.getElementById('monthly401k').value) || 0;
+        const yearlyRothIra = parseFloat(document.getElementById('yearlyRothIra').value) || 0;
+        const monthlyRent = parseFloat(document.getElementById('monthlyRent').value) || 0;
+        const monthlyExtra = parseFloat(document.getElementById('monthlyExtra').value) || 0;
+        const currentBalance = parseFloat(document.getElementById('currentBalanceInput').value) || 0;
+        const annualReturn = parseFloat(document.getElementById('annualReturn').value) || 0;
+        const stateTaxRate = parseFloat(document.getElementById('stateTaxRate').value) || 0;
+        const goal = parseFloat(document.getElementById('goal').value) || 0;
+        const inflationToggle = document.getElementById('inflationToggle').checked;
 
 
     // Calculate monthly gross income
     const monthlyGrossIncome = hourlyWage * hoursPerWeek * 4.33;
+    const annualGrossIncome = monthlyGrossIncome * 12;
 
     // Validate if salary is enough to cover expenses
     const monthlyRothIra = yearlyRothIra / 12;
     const monthlyTaxableIncome = monthlyGrossIncome - monthly401k;
     const taxRate = 0.24;
+    const federalTaxRate = calculateFederalTaxRate(annualGrossIncome);
     // const stateTaxRate = 0.05;
     const ficaTaxRate = 0.0765;
-    const monthlyTaxes = monthlyTaxableIncome * (taxRate + stateTaxRate/100 + ficaTaxRate);
+    const monthlyTaxes = monthlyTaxableIncome * (federalTaxRate + stateTaxRate/100 + ficaTaxRate);
     const monthlyTakeHome = monthlyTaxableIncome - monthlyTaxes - monthlyRothIra;
     const totalMonthlyExpenses = monthlyRent + monthlyExtra;
 
@@ -528,17 +580,22 @@ document.querySelectorAll('.input-group input').forEach(input => {
         showNotification("Cannot be negative values");
         return;
     }
-
+    
     if (monthlyTakeHome < totalMonthlyExpenses) {
         showNotification("Your monthly take-home pay is not enough to cover your monthly expenses");
         return;
     }
-
+    
     // Proceed with calculations if validation passes
-    const monthlyAvailableForVoo = monthlyTakeHome - totalMonthlyExpenses;
+    // Constants
+    const inflationRate = 0.03; // 3% inflation
+    const nominalReturn = annualReturn / 100; // Convert percentage to decimal
+    const realReturn = inflationToggle ? (1 + nominalReturn) / (1 + inflationRate) - 1 : nominalReturn;
+    // Proceed with calculations if validation passes
     const monthlyReturn = Math.pow(1 + annualReturn / 100, 1 / 12) - 1;
-
-    // Calculate yearly balances
+    const monthlyAvailableForVoo = monthlyTakeHome - totalMonthlyExpenses;
+    const monthlyRealReturn = Math.pow(1 + realReturn, 1 / 12) - 1;
+    
     let balance = currentBalance;
     let months = 0;
     const yearlyBalances = [];
@@ -551,21 +608,32 @@ document.querySelectorAll('.input-group input').forEach(input => {
             backgroundColor: 'rgba(143, 182, 171, 0.2)',
         }],
     };
-    let balance_count=0
-    while (balance_count <= goal && months <= 1200) {
+    
+    // Function to calculate inflation-adjusted value
+    function adjustForInflation(value, years, inflationRate = 0.03) {
+        return value / Math.pow(1 + inflationRate, years);
+    }
+
+    let adjustedBalance = 0
+    while (adjustedBalance <= goal && months <= 1200) {
         if (months % 12 === 0) {
-            balance_count=balance;
+            // Adjust balance for inflation if the toggle is enabled
+            adjustedBalance = inflationToggle ? adjustForInflation(balance, months / 12) : balance;
             yearlyBalances.push({
                 year: months / 12,
-                balance: balance,
+                balance: adjustedBalance,
             });
             chartData.labels.push(`${months / 12}`);
-            chartData.datasets[0].data.push(balance);
+            chartData.datasets[0].data.push(adjustedBalance);
         }
 
+        // Adjust monthly contributions for inflation if the toggle is enabled
+        const adjustedMonthlyContribution = inflationToggle ? adjustForInflation(monthlyAvailableForVoo, months / 12) : monthlyAvailableForVoo;
+
+        // Calculate the new balance
         balance *= (1 + monthlyReturn);
-        balance += monthlyAvailableForVoo;
-        balance = Math.floor(balance * 100) / 100;
+        balance += adjustedMonthlyContribution;
+        balance = Math.floor(balance * 100) / 100; // Round to 2 decimal places
         months += 1;
     }
 
@@ -665,10 +733,90 @@ document.querySelectorAll('.input-group input').forEach(input => {
             },
         },
     });
+
+
+
+    
+let pieChart;
+
+// Prepare data for the pie chart
+const pieChartData = {
+    labels: ['Taxes', 'Roth', 'Expenses', 'Investments'],
+    datasets: [{
+        data: [monthlyTaxes, monthlyRothIra, totalMonthlyExpenses, monthlyAvailableForVoo],
+        backgroundColor: [
+            '#a8d498', // Pastel green 1
+            '#96d4bf', // Pastel green 2
+            '#cced9f', // Pastel green 3
+            '#98d6a2', // Pastel green 4
+        ],
+        borderColor: [
+            '#e0ffee', // Darker shade for border
+        ],
+        borderWidth: 2,
+    }],
+};
+
+// Update the pie chart
+if (pieChart) {
+    pieChart.destroy();
 }
+const pieCtx = document.getElementById('incomePieChart').getContext('2d');
+
+// Create the chart instance
+pieChart = new Chart(pieCtx, {
+    type: 'pie',
+    data: pieChartData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false, // Allow manual sizing
+        plugins: {
+            legend: {
+                // position: 'bottom',
+                display: false, //disables legend
+                labels: {
+                    usePointStyle: true,
+                    fontSize: 1, // Adjust legend font size
+                    boxWidth: 12,
+                },
+            },
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        let label = `$${Math.round(context.raw)}`; // Percentage
+                        return label; 
+                    },
+                },
+            },
+            datalabels: {
+                color: '#375c47', 
+                font: {
+                    size: 12, // Adjust font size for labels
+                    weight: 'bold', // Make labels bold
+                },
+                formatter: function (value, context) {
+                    const total = context.chart.data.datasets[0].data.reduce((acc, val) => acc + val, 0);
+                    const percentage = Math.round((value / total) * 100);
+                    return `${percentage}%`; // Display percentage
+                },
+            },
+        },
+    },
+    plugins: [ChartDataLabels], // Include the datalabels plugin
+});
+
+
+
+
+}
+
+
 
         // Initialize with default values
         updateCalculations();
     </script>
 </body>
+
+
+
 </html>
