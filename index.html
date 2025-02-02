@@ -28,11 +28,12 @@
             width: 100%;
             padding-bottom: 2rem;
             overflow: auto; 
+            -ms-overflow-style: none;  /* Internet Explorer 10+ */
+            scrollbar-width: none;  /* Firefox */
         }
-        
-        .container::-webkit-scrollbar {
-            width: 0; /* Hide the vertical scrollbar */
-            height: 0; /* Hide the horizontal scrollbar */
+
+        ::-webkit-scrollbar {
+            display: none;
         }
 
         .header {
@@ -306,32 +307,14 @@
             <div class="card about-section">
                 <div class="card-title">About</div>
                 <div id="aboutsection" class="text-section">
-           <p>
-            Plan your financial strategy by estimating the growth of your savings over time. The recommended strategy is to maximize your tax-advantaged accounts, such as your 401(k) and Roth IRA. Then, invest any remaining savings in a high-yield savings account (low risk, low return) or a brokerage account (higher risk, potentially higher return). It is reccommended to invest in VOO/VTI over individual stocks. Your monthly take-home pay is calculated by subtracting your expenses and Roth contributions, and we project how your savings will grow over time based on the annual return rate.
-        </p>
-
-        <p>&nbsp;</p> <!-- This adds a newline between the paragraphs -->
-
-        <p>
-            <strong>Current Balance:</strong> The amount you’ve already saved or invested, excluding your Roth IRA contributions. This is because we’re calculating for shorter-term investments like a car or house.
-        </p>
-
-        <p>
-            <strong>Annual Return:</strong> The estimated percentage increase in your investment balance each year, based on historical stock market performance or interest rates.
-        </p>
-
-        <p>
-            <strong>Monthly Expenses:</strong> Any additional costs such as utilities, groceries, subscriptions, and more.
-        </p>
-
-        <p>
-            <strong>Investment Goal:</strong> The amount you’re saving for specific targets, like purchasing a house, car, or going on a vacation.
-        </p>
-
-                </div>
-            </div>
-
-
+          <p> Plan your financial strategy for long-term success. First, maximize contributions to tax-advantaged accounts such as your 401(k) and Roth IRA. Next, consider allocating any remaining savings into a high-yield savings account (which offers low risk and lower returns) or a brokerage account (a higher risk for potentially greater returns). It's generally advisable to invest in diversified index funds like VOO or VTI rather than individual stocks. </p> 
+        <br> 
+        <p> 
+        <strong>Current Balance:</strong> This is the total amount you’ve already saved or invested, excluding your Roth IRA contributions, as we focus on shorter-term investments such as a car or house. </p> 
+        <p> <strong>Annual Return:</strong> This refers to the estimated percentage growth of your investment balance each year, informed by historical stock market performance and prevailing interest rates. </p>
+        <p> <strong>Monthly Expenses:</strong> This includes all your recurring costs, such as utilities, groceries, subscriptions, and other necessary expenditures. </p> 
+        <p> <strong>Investment Goal:</strong> Here, you'll define your specific financial targets, like buying a home, purchasing a vehicle, or planning a much-deserved vacation. </p> 
+        <p> By consciously tracking these elements, you can better project how your savings will grow over time based on your estimated annual return rate, ultimately setting you on a path to meet your financial objectives. </p>
 
         </div>
 
