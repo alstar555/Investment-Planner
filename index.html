@@ -13,18 +13,39 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
+        /* Responsive design for smaller screens */
+        @media (max-width: 600px) {
+            .about-section {
+                padding: 8px; /* Less padding on smaller screens */
+            }
+
+            .text-section p {
+                font-size: 14px; /* Smaller text size for better readability */
+            }
+        }
+
+
         body {
             background: linear-gradient(to bottom right, #d6f0c8, #d8e8c8);
             min-height: 100vh;
-            padding: 1rem;
+            padding: 2rem;
             display: flex;
             justify-content: center;
+            scrollbar-width: none;
         }
+
 
         .container {
             max-width: 1000px;
             width: 100%;
             padding-bottom: 2rem;
+            overflow: auto; 
+            -ms-overflow-style: none;  /* Internet Explorer 10+ */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
         }
 
         .header {
@@ -36,23 +57,20 @@
 
         .cards-grid {
             display: flex;
-            flex-wrap: wrap;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1rem;
             margin-bottom: 1rem;
         }
 
-      
-
         .card {
-            flex: 1; /* Allows the cards to grow/shrink */
-            min-width: 300px; /* Ensures cards have a minimum width */
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 2rem;
-            width: auto;
+            margin-bottom: 1rem;
+            width: 40%;
+            flex:1;
         }
 
         .card-title {
@@ -133,7 +151,7 @@
         .input-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
+            gap: 0.5rem; /* Reduced gap */
             margin-bottom: 1rem;
         }
 
@@ -144,19 +162,19 @@
         .input-group label {
             display: block;
             color: #6a8a7e;
-            font-size: 0.75rem;
+            font-size: 0.75rem; /* Smaller font size */
             font-weight: 500;
             margin-bottom: 0.25rem;
         }
 
         .input-group input {
             width: 100%;
-            padding: 0.3rem;
+            padding: 0.3rem; /* Reduced padding */
             border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            border-radius: 6px; /* Slightly smaller border radius */
+            font-size: 0.75rem; /* Smaller font size */
             color: #6a8a7e;
-            appearance: none;
+            appearance: none; /* Remove number input arrows */
         }
 
         .input-group input:focus {
@@ -167,13 +185,13 @@
         .button {
             background: #8fb6ab;
             color: white;
-            padding: 0.4rem 0.8rem;
+            padding: 0.4rem 0.8rem; /* Smaller padding */
             border: none;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            border-radius: 6px; /* Slightly smaller border radius */
+            font-size: 0.75rem; /* Smaller font size */
             cursor: pointer;
             transition: background 0.3s ease;
-            width: 100%;
+            width: 30%;
         }
 
         .button:hover {
@@ -183,35 +201,37 @@
         .chart-container {
             margin-top: 1rem;
             width: 100%;
-            height: 300px;
+            height: 300px; /* or any suitable height */
         }
 
         .side-by-side {
             display: flex;
-            flex-wrap: wrap; /* Allow wrapping */
-            gap: 1rem; /* Space between items */
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
             margin-top: 1rem;
+            justify-content: space-between; /* Space between the cards */
+            align-items: flex-start; /* Align the items at the start */
+            margin-top: 20px; /* Optional: space above the side-by-side section */
         }
 
-
         .notification {
-            display: none;
-            padding: 10px;
+            display: none; /* Initially hidden */
+            padding: 10px; /* Adjusted padding */
             margin: 10px 0;
             border-radius: 5px;
-            background-color: rgba(248, 215, 218, 0.8);
-            color: #721c24;
-            border: 1px solid rgba(245, 198, 203, 0.8);
+            background-color: rgba(248, 215, 218, 0.8); /* Light red background with transparency */
+            color: #721c24; /* Dark red text */
+            border: 1px solid rgba(245, 198, 203, 0.8); /* Darker red border with transparency */
             position: relative;
             width: 100%;
-            max-width: 400px;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
+            max-width: 400px; /* limit width */
+            transition: all 0.3s ease; /* Smooth transition for showing */
+            font-size: 0.9em; /* Smaller font size */
             opacity: 0.7;
         }
 
         .notification.visible {
-            display: block;
+            display: block; /* Show notification */
         }
 
         .notification .close {
@@ -220,7 +240,7 @@
             top: 5px;
             cursor: pointer;
             color: #721c24;
-            font-size: 1.2em;
+            font-size: 1.2em; /* Adjust size for closer button */
         }
 
         .about-section {
@@ -229,92 +249,104 @@
             color: #6a8a7e;
         }
 
-        /* Responsive Design for Mobile Screens */
-        @media (max-width: 600px) {
-            .side-by-side {
-                flex-direction: column; /* Stack items vertically on small screens */
-            }
-            
-            .card {
-                width: 100%; /* Ensure cards take full width */
-                max-width: None;
-            }
+     
+
         
 
-        }
     </style>
 </head>
 <body>
+
     <div class="container">
         <h1 class="header">Investment Calculator</h1>
 
         <div id="notification" class="notification"></div>
 
+
         <!-- User Input Section -->
         <div class="side-by-side">
-            <div class="card">
-                <div class="card-title">Financial Details</div>
-                <div class="input-grid">
-                    <div class="input-group">
-                        <label for="hourlyWage">Hourly Wage:</label>
-                        <input type="number" id="hourlyWage" value="44">
-                    </div>
-                    <div class="input-group">
-                        <label for="hoursPerWeek">Hours per Week:</label>
-                        <input type="number" id="hoursPerWeek" value="40">
-                    </div>
-                    <div class="input-group">
-                        <label for="monthly401k">Monthly 401k:</label>
-                        <input type="number" id="monthly401k" value="2000">
-                    </div>
-                    <div class="input-group">
-                        <label for="yearlyRothIra">Yearly Roth IRA:</label>
-                        <input type="number" id="yearlyRothIra" value="7000">
-                    </div>
-                    <div class="input-group">
-                        <label for="monthlyRent">Monthly Rent/Morgage:</label>
-                        <input type="number" id="monthlyRent" value="1000">
-                    </div>
-                    <div class="input-group">
-                        <label for="monthlyExtra">Monthly Spending:</label>
-                        <input type="number" id="monthlyExtra" value="100">
-                    </div>
-                    <div class="input-group">
-                        <label for="currentBalance">Current Balance:</label>
-                        <input type="number" id="currentBalanceInput" value="1000">
-                    </div>
-                    <div class="input-group">
-                        <label for="annualReturn">Annual Return (%):</label>
-                        <input type="number" id="annualReturn" value="7">
-                    </div>
-                    <div class="input-group">
-                        <label for="stateTaxRate">State Tax Rate (%):</label>
-                        <input type="number" id="stateTaxRate" value="5">
-                    </div>
-                    <div class="input-group">
-                        <label for="goal">Investment Goal:</label>
-                        <input type="number" id="goal" value="300000">
-                    </div>
-                </div>
-                <button class="button" onclick="updateCalculations()" id="updateButton">Update</button>
-            </div>
 
-            <!-- About Section -->
-            <div class="card about-section">
-                <div class="card-title">About</div>
-                <div id="aboutsection" class="text-section">
-                    <p>Plan your financial strategy for long-term success. First, maximize contributions to tax-advantaged accounts such as your 401(k) and Roth IRA. Next, consider allocating any remaining savings into a high-yield savings account (which offers low risk and lower returns) or a brokerage account (a higher risk for potentially greater returns). It's generally advisable to invest in diversified index funds like VOO or VTI rather than individual stocks.</p>
-                    <br>
-                    <p><strong>Current Balance:</strong> This is the total amount you’ve already saved or invested, excluding your Roth IRA contributions, as we focus on shorter-term investments such as a car or house.</p>
-                    <p><strong>Annual Return:</strong> This refers to the estimated percentage growth of your investment balance each year, informed by historical stock market performance and prevailing interest rates.</p>
-                    <p><strong>Monthly Expenses:</strong> This includes all your recurring costs, such as utilities, groceries, subscriptions, and other necessary expenditures.</p>
-                    <p><strong>Investment Goal:</strong> Here, you'll define your specific financial targets, like buying a home, purchasing a vehicle, or planning a much-deserved vacation.</p>
-                    <p>By consciously tracking these elements, you can better project how your savings will grow over time based on your estimated annual return rate, ultimately setting you on a path to meet your financial objectives.</p>
+        <div class="card">
+            <div class="card-title">Financial Details</div>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="hourlyWage">Hourly Wage:</label>
+                    <input type="number" id="hourlyWage" value="44">
+                </div>
+                <div class="input-group">
+                    <label for="hoursPerWeek">Hours per Week:</label>
+                    <input type="number" id="hoursPerWeek" value="40">
+                </div>
+                <div class="input-group">
+                    <label for="monthly401k">Monthly 401k:</label>
+                    <input type="number" id="monthly401k" value="2000">
+                </div>
+                <div class="input-group">
+                    <label for="yearlyRothIra">Yearly Roth IRA:</label>
+                    <input type="number" id="yearlyRothIra" value="7000">
+                </div>
+                <div class="input-group">
+                    <label for="monthlyRent">Monthly Rent/Morgage:</label>
+                    <input type="number" id="monthlyRent" value="1000">
+                </div>
+                <div class="input-group">
+                    <label for="monthlyExtra">Monthly Spending:</label>
+                    <input type="number" id="monthlyExtra" value="100">
+                </div>
+                <div class="input-group">
+                    <label for="currentBalance">Current Balance:</label>
+                    <input type="number" id="currentBalanceInput" value="1000">
+                </div>
+                <div class="input-group">
+                    <label for="annualReturn">Annual Return (%):</label>
+                    <input type="number" id="annualReturn" value="7">
+                </div>
+                <div class="input-group">
+                    <label for="stateTaxRate">State Tax Rate (%):</label>
+                    <input type="number" id="stateTaxRate" value="5">
+                </div>
+                <div class="input-group">
+                    <label for="goal">Investment Goal:</label>
+                    <input type="number" id="goal" value="300000">
                 </div>
             </div>
+            <button class="button" onclick="updateCalculations()" id="updateButton">Update</button>
+
+
         </div>
 
-        <!-- Yearly Progress and Chart Section -->
+            <!-- About Section -->
+        <div class="card about-section">
+          <div class="card-title">About</div>
+          <div id="aboutsection" class="text-section">
+            <p>
+              Plan your financial strategy for long-term success. First, maximize contributions to tax-advantaged accounts such as your 401(k) and Roth IRA. Next, consider allocating any remaining savings into a high-yield savings account (which offers low risk and lower returns) or a brokerage account (a higher risk for potentially greater returns). It's generally advisable to invest in diversified index funds like VOO or VTI rather than individual stocks.
+            </p>
+            <br>
+            <p>
+              <strong>Current Balance:</strong> This is the total amount you’ve already saved or invested, excluding your Roth IRA contributions, as we focus on shorter-term investments such as a car or house.
+            </p>
+            <p>
+              <strong>Annual Return:</strong> This refers to the estimated percentage growth of your investment balance each year, informed by historical stock market performance and prevailing interest rates.
+            </p>
+            <p>
+              <strong>Monthly Expenses:</strong> This includes all your recurring costs, such as utilities, groceries, subscriptions, and other necessary expenditures.
+            </p>
+            <p>
+              <strong>Investment Goal:</strong> Here, you'll define your specific financial targets, like buying a home, purchasing a vehicle, or planning a much-deserved vacation.
+            </p>
+            <p>
+              By consciously tracking these elements, you can better project how your savings will grow over time based on your estimated annual return rate, ultimately setting you on a path to meet your financial objectives.
+            </p>
+          </div>
+        </div>
+
+
+
+        </div>
+
+
+         <!-- Yearly Progress and Chart Section -->
         <div class="side-by-side" id="widgets">
             <!-- Yearly Progress -->
             <div class="card yearly-progress">
@@ -329,8 +361,10 @@
             </div>
         </div>
 
+
         <!-- Results Section -->
         <div class="cards-grid">
+
             <div class="card">
                 <div class="card-title">
                     <svg class="icon" viewBox="0 0 24 24">
@@ -364,7 +398,7 @@
                     Monthly Investment
                 </div>
                 <div class="card-value" id="monthlyInvestment">$0</div>
-                <div class="card-subtitle" id="timeGoalText">Available for investing</div>
+                <div class="card-subtitle" id="timeGoalText">Available for investing</div> 
             </div>
 
             <div class="card">
@@ -379,8 +413,9 @@
                 <div class="card-subtitle" id="annualReturnText">At 7% annual return</div>
             </div>
         </div>
-    </div>
 
+       
+    </div>
 
 
     <script>
