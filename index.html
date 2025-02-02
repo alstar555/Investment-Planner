@@ -206,12 +206,9 @@
 
         .side-by-side {
             display: flex;
-            grid-template-columns: 2fr 1fr;
-            gap: 1rem;
+            flex-wrap: wrap; /* Allow wrapping */
+            gap: 1rem; /* Space between items */
             margin-top: 1rem;
-            justify-content: space-between; /* Space between the cards */
-            align-items: flex-start; /* Align the items at the start */
-            margin-top: 20px; /* Optional: space above the side-by-side section */
         }
 
         .notification {
@@ -271,7 +268,7 @@
             <div class="input-grid">
                 <div class="input-group">
                     <label for="hourlyWage">Hourly Wage:</label>
-                    <input type="number" id="hourlyWage" value="44">
+                    <input type="number" id="hourlyWage" value="50">
                 </div>
                 <div class="input-group">
                     <label for="hoursPerWeek">Hours per Week:</label>
