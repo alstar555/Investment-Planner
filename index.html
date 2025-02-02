@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom right, #d6f0c8, #d8e8c8);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            padding-bottom: 2rem;
+        }
+
+        .header {
+            color: #6a8a7e;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .cards-grid {
+            display: flex;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
+            width: 40%;
+        }
+
+        .card-title {
+            color: #6a8a7e;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-value {
+            color: #5a7a6e;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            color: #6a8a7e;
+            font-size: 0.875rem;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: #e0e0e0;
+            border-radius: 9999px;
+            height: 8px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #8fb6ab;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        .yearly-progress {
+            margin-top: 1rem;
+        }
+
+        .year-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .year-label {
+            color: #6a8a7e;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .year-value {
+            color: #8fb6ab;
+            font-size: 0.875rem;
+            text-align: right;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem; /* Reduced gap */
+            margin-bottom: 1rem;
+        }
+
+        .input-group {
+            margin-bottom: 0;
+        }
+
+        .input-group label {
+            display: block;
+            color: #6a8a7e;
+            font-size: 0.75rem; /* Smaller font size */
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.3rem; /* Reduced padding */
+            border: 1px solid #e0e0e0;
+            border-radius: 6px; /* Slightly smaller border radius */
+            font-size: 0.75rem; /* Smaller font size */
+            color: #6a8a7e;
+            appearance: none; /* Remove number input arrows */
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #8fb6ab;
+        }
+
+        .button {
+            background: #8fb6ab;
+            color: white;
+            padding: 0.4rem 0.8rem; /* Smaller padding */
+            border: none;
+            border-radius: 6px; /* Slightly smaller border radius */
+            font-size: 0.75rem; /* Smaller font size */
+            cursor: pointer;
+            transition: background 0.3s ease;
+            width: 30%;
+        }
+
+        .button:hover {
+            background: #7aa699;
+        }
+
+        .chart-container {
+            margin-top: 1rem;
+        }
+
+        .side-by-side {
+            display: flex;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .notification {
+            display: none; /* Initially hidden */
+            padding: 10px; /* Adjusted padding */
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: rgba(248, 215, 218, 0.8); /* Light red background with transparency */
+            color: #721c24; /* Dark red text */
+            border: 1px solid rgba(245, 198, 203, 0.8); /* Darker red border with transparency */
+            position: relative;
+            width: 100%;
+            max-width: 400px; /* limit width */
+            transition: all 0.3s ease; /* Smooth transition for showing */
+            font-size: 0.9em; /* Smaller font size */
+            opacity: 0.7;
+        }
+
+        .notification.visible {
+            display: block; /* Show notification */
+        }
+
+        .notification .close {
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            cursor: pointer;
+            color: #721c24;
+            font-size: 1.2em; /* Adjust size for closer button */
+        }
+
+        .side-by-side {
+            display: flex; /* Use flexbox to align child elements */
+            justify-content: space-between; /* Space between the cards */
+            align-items: flex-start; /* Align the items at the start */
+            margin-top: 20px; /* Optional: space above the side-by-side section */
+        }
+
+        .card {
+            flex: 1; /* Allow cards to grow and shrink equally */
+        }
+
+     
+
+        
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="header">Investment Calculator</h1>
+
+        <div id="notification" class="notification"></div>
+
+
+        <!-- User Input Section -->
+        <div class="card">
+            <div class="card-title">Financial Details</div>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="hourlyWage">Hourly Wage:</label>
+                    <input type="number" id="hourlyWage" value="44">
+                </div>
+                <div class="input-group">
+                    <label for="hoursPerWeek">Hours per Week:</label>
+                    <input type="number" id="hoursPerWeek" value="40">
+                </div>
+                <div class="input-group">
+                    <label for="monthly401k">Monthly 401k:</label>
+                    <input type="number" id="monthly401k" value="2000">
+                </div>
+                <div class="input-group">
+                    <label for="yearlyRothIra">Yearly Roth IRA:</label>
+                    <input type="number" id="yearlyRothIra" value="7000">
+                </div>
+                <div class="input-group">
+                    <label for="monthlyRent">Monthly Rent/Morgage:</label>
+                    <input type="number" id="monthlyRent" value="1000">
+                </div>
+                <div class="input-group">
+                    <label for="monthlyExtra">Monthly Spending:</label>
+                    <input type="number" id="monthlyExtra" value="100">
+                </div>
+                <div class="input-group">
+                    <label for="currentBalance">Current Balance:</label>
+                    <input type="number" id="currentBalanceInput" value="1000">
+                </div>
+                <div class="input-group">
+                    <label for="annualReturn">Annual Return (%):</label>
+                    <input type="number" id="annualReturn" value="7">
+                </div>
+                <div class="input-group">
+                    <label for="goal">Investment Goal:</label>
+                    <input type="number" id="goal" value="300000">
+                </div>
+            </div>
+            <button class="button" onclick="updateCalculations()">Update</button>
+        </div>
+
+         <!-- Yearly Progress and Chart Section -->
+        <div class="side-by-side">
+            <!-- Yearly Progress -->
+            <div class="card yearly-progress">
+                <div class="card-title">Yearly Progress</div>
+                <div id="yearlyProgress"></div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="card chart-container">
+                <div class="card-title">Balance</div>
+                <canvas id="balanceChart"></canvas>
+            </div>
+        </div>
+
+
+        <!-- Results Section -->
+        <div class="cards-grid">
+
+            <div class="card">
+                <div class="card-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    Current Balance
+                </div>
+                <div class="card-value" id="currentBalance">$0</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4s3-1 3-4c0-1.8-.5-7-2-9Z"></path>
+                    </svg>
+                    Goal Progress
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="goalProgress" style="width: 0%"></div>
+                </div>
+                <div class="card-subtitle" id="goalText">0% of $300,000</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path>
+                        <path d="M4 6v12c0 1.1.9 2 2 2h14v-4"></path>
+                        <path d="M18 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2Z"></path>
+                    </svg>
+                    Monthly Investment
+                </div>
+                <div class="card-value" id="monthlyInvestment">$0</div>
+                <div class="card-subtitle" id="timeGoalText">Available for investing</div> 
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="m23 6-9.5 9.5-5-5L1 18"></path>
+                        <path d="M17 6h6v6"></path>
+                    </svg>
+                    Time to Goal
+                </div>
+                <div class="card-value" id="timeToGoal">0 years</div>
+                <div class="card-subtitle" id="annualReturnText">At 7% annual return</div>
+            </div>
+        </div>
+
+       
+    </div>
+
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+    loadSavedInputs(); // Load saved values on page load
+});
+
+// Function to save inputs in localStorage
+function saveInputs() {
+    const inputs = {
+        hourlyWage: document.getElementById('hourlyWage').value,
+        hoursPerWeek: document.getElementById('hoursPerWeek').value,
+        monthly401k: document.getElementById('monthly401k').value,
+        yearlyRothIra: document.getElementById('yearlyRothIra').value,
+        monthlyRent: document.getElementById('monthlyRent').value,
+        monthlyExtra: document.getElementById('monthlyExtra').value,
+        currentBalance: document.getElementById('currentBalanceInput').value,
+        annualReturn: document.getElementById('annualReturn').value,
+        goal: document.getElementById('goal').value
+    };
+    localStorage.setItem('investmentInputs', JSON.stringify(inputs));
+}
+
+// Function to load inputs from localStorage
+function loadSavedInputs() {
+    const savedInputs = JSON.parse(localStorage.getItem('investmentInputs'));
+    if (savedInputs) {
+        document.getElementById('hourlyWage').value = savedInputs.hourlyWage || '';
+        document.getElementById('hoursPerWeek').value = savedInputs.hoursPerWeek || '';
+        document.getElementById('monthly401k').value = savedInputs.monthly401k || '';
+        document.getElementById('yearlyRothIra').value = savedInputs.yearlyRothIra || '';
+        document.getElementById('monthlyRent').value = savedInputs.monthlyRent || '';
+        document.getElementById('monthlyExtra').value = savedInputs.monthlyExtra || '';
+        document.getElementById('currentBalanceInput').value = savedInputs.currentBalance || '';
+        document.getElementById('annualReturn').value = savedInputs.annualReturn || '';
+        document.getElementById('goal').value = savedInputs.goal || '';
+    }
+}
+
+// Attach event listeners to save inputs whenever they change
+document.querySelectorAll('.input-group input').forEach(input => {
+    input.addEventListener('input', saveInputs);
+});
+        let chart;
+
+        // Function to update calculations based on user input
+        function updateCalculations() {
+    // Get user inputs
+    const hourlyWage = parseFloat(document.getElementById('hourlyWage').value) || 0;
+    const hoursPerWeek = parseFloat(document.getElementById('hoursPerWeek').value) || 0;
+    const monthly401k = parseFloat(document.getElementById('monthly401k').value) || 0;
+    const yearlyRothIra = parseFloat(document.getElementById('yearlyRothIra').value) || 0;
+    const monthlyRent = parseFloat(document.getElementById('monthlyRent').value) || 0;
+    const monthlyExtra = parseFloat(document.getElementById('monthlyExtra').value) || 0;
+    const currentBalance = parseFloat(document.getElementById('currentBalanceInput').value) || 0;
+    const annualReturn = parseFloat(document.getElementById('annualReturn').value) || 0;
+    const goal = parseFloat(document.getElementById('goal').value) || 0;
+
+    function showNotification(message) {
+        const notificationElement = document.getElementById('notification');
+        notificationElement.textContent = message;
+        notificationElement.classList.add('visible'); // Add class to make it visible
+
+        // Add close button
+        const closeButton = document.createElement('span');
+        closeButton.textContent = '×'; // "X" symbol
+        closeButton.className = 'close';
+        closeButton.onclick = () => {
+            notificationElement.classList.remove('visible'); // Hide notification when clicked
+        };
+
+        notificationElement.appendChild(closeButton); // Append the close button
+
+        // Optionally, hide the notification after a few seconds
+        setTimeout(() => {
+            notificationElement.classList.remove('visible');
+        }, 50000); // Hide after 5 seconds
+    }
+
+
+    // Calculate monthly gross income
+    const monthlyGrossIncome = hourlyWage * hoursPerWeek * 4.33;
+
+    // Validate if salary is enough to cover expenses
+    const monthlyRothIra = yearlyRothIra / 12;
+    const monthlyTaxableIncome = monthlyGrossIncome - monthly401k;
+    const taxRate = 0.24;
+    const stateTaxRate = 0.05;
+    const ficaTaxRate = 0.0765;
+    const monthlyTaxes = monthlyTaxableIncome * (taxRate + stateTaxRate + ficaTaxRate);
+    const monthlyTakeHome = monthlyTaxableIncome - monthlyTaxes - monthlyRothIra;
+    const totalMonthlyExpenses = monthlyRent + monthlyExtra;
+
+    // Validate inputs
+    if (hourlyWage < 0 || hoursPerWeek < 0 || monthly401k < 0 || yearlyRothIra < 0 || monthlyRent < 0 || monthlyExtra < 0
+        || currentBalance < 0 || annualReturn < 0 || annualReturn > 100 || goal < 0) {
+        showNotification("Cannot be negative values");
+        return;
+    }
+
+    if (monthlyTakeHome < totalMonthlyExpenses) {
+        showNotification("Your monthly take-home pay is not enough to cover your monthly expenses");
+        return;
+    }
+
+    // Proceed with calculations if validation passes
+    const monthlyAvailableForVoo = monthlyTakeHome - totalMonthlyExpenses;
+    const monthlyReturn = Math.pow(1 + annualReturn / 100, 1 / 12) - 1;
+
+    // Calculate yearly balances
+    let balance = currentBalance;
+    let months = 0;
+    const yearlyBalances = [];
+    const chartData = {
+        labels: [],
+        datasets: [{
+            label: 'Balance Over Time',
+            data: [],
+            borderColor: '#8fb6ab',
+            backgroundColor: 'rgba(143, 182, 171, 0.2)',
+        }],
+    };
+    let balance_count=0
+    while (balance_count <= goal && months <= 1200) {
+        if (months % 12 === 0) {
+            balance_count=balance;
+            yearlyBalances.push({
+                year: months / 12,
+                balance: balance,
+            });
+            chartData.labels.push(`${months / 12}`);
+            chartData.datasets[0].data.push(balance);
+        }
+
+        balance *= (1 + monthlyReturn);
+        balance += monthlyAvailableForVoo;
+        balance = Math.floor(balance * 100) / 100;
+        months += 1;
+    }
+
+    // Update UI elements
+    document.getElementById('monthlyInvestment').textContent =
+        `$${monthlyAvailableForVoo.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+
+    const yearsToGoal = Math.floor(months/12) || 0;
+    document.getElementById('timeToGoal').textContent = `${yearsToGoal} years`;
+    document.getElementById('annualReturnText').textContent = `At ${annualReturn}% annual return`;
+
+    // Animate current balance
+    let animatedBalance = 0;
+    const animate = () => {
+        if (animatedBalance >= currentBalance) return;
+
+        animatedBalance += currentBalance / 100;
+        const progressPercentage = Math.min((animatedBalance / goal) * 100, 100);
+
+        document.getElementById('currentBalance').textContent =
+            `$${animatedBalance.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+        document.getElementById('goalProgress').style.width = `${progressPercentage}%`;
+        document.getElementById('goalText').textContent =
+            `${progressPercentage.toFixed(1)}% of $${goal.toLocaleString()}`;
+
+        requestAnimationFrame(animate);
+    };
+    animate();
+
+    // Create yearly progress bars
+    const yearlyProgressContainer = document.getElementById('yearlyProgress');
+    yearlyProgressContainer.innerHTML = ''; // Clear previous content
+    yearlyBalances.forEach(yearData => {
+        const yearRow = document.createElement('div');
+        yearRow.className = 'year-row';
+
+        const yearLabel = document.createElement('div');
+        yearLabel.className = 'year-label';
+        yearLabel.textContent = `Year ${yearData.year}`;
+
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'progress-container';
+
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        progressBar.style.width = '0%'; // Start at 0% for animation
+
+        const valueLabel = document.createElement('div');
+        valueLabel.className = 'year-value';
+        valueLabel.textContent = `$${yearData.balance.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+
+        progressContainer.appendChild(progressBar);
+        yearRow.appendChild(yearLabel);
+        yearRow.appendChild(progressContainer);
+        yearRow.appendChild(valueLabel);
+        yearlyProgressContainer.appendChild(yearRow);
+
+        // Animate the progress bar
+        setTimeout(() => {
+            progressBar.style.width = `${Math.min((yearData.balance / goal) * 100, 100)}%`;
+        }, 100);
+    });
+
+    // Update the chart
+    if (chart) {
+        chart.destroy();
+    }
+    const ctx = document.getElementById('balanceChart').getContext('2d');
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: chartData,
+        options: {
+            responsive: true,
+            animation: {
+                duration: 1000,
+                easing: 'linear',
+            },
+            plugins: {
+                legend: {
+                    display: false, // Disable legend
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Balance',
+                    },
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Years',
+                    },
+                },
+            },
+        },
+    });
+}
+
+        // Initialize with default values
+        updateCalculations();
+    </script>
+</body>
+</html>
