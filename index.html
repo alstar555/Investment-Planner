@@ -76,7 +76,7 @@
         .card-title {
             color: #6a8a7e;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
@@ -117,7 +117,7 @@
 
         .about-section {
 /*            margin-top: 10%;*/
-            margin-bottom: 10%;
+            margin-bottom: 2%;
         }
 
         .year-row {
@@ -157,7 +157,7 @@
         }
 
         .input-group {
-            margin-bottom: 0;
+            margin-bottom: 0.2rem;
         }
 
         .input-group label {
@@ -249,11 +249,11 @@
 
         .switch {
             display: inline-flex;
-            align-items: center; Aligns checkbox with label
+            align-items: center;
             color: #6a8a7e;
             font-size: 10px;
         }
-        
+
         .switch input[type="checkbox"] {
             accent-color: #6a8a7e; /* Changes the check mark color to green */
         }
@@ -264,10 +264,30 @@
             padding: 4px;
         }
 
+        .toggle-container {
+            display: flex; /* Use flexbox */
+            justify-content: center; /* Center items horizontally */
+            align-items: center; /* Center items vertically */
+            width: 23%;
+            padding: 0.5rem;
+            border: 1px solid #ffffff;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #6a8a7e;
+            background: rgb(201, 222, 228);
+            appearance: none;
+            font-weight: bold;
+            cursor: pointer; /* Change cursor to pointer */
+        }
 
-     
+        .toggle-container:hover {
+            background-color: rgb(166, 213, 229)
+        }
 
-        
+        /* Newly added class for toggled state */
+        .toggled {
+            background-color: rgb(166, 213, 229); /* Toggled color */
+        }
 
     </style>
 </head>
@@ -337,18 +357,23 @@
                     <input type="number" id="goal" value="300000">
                 </div>
             </div>
-
-            
             <button class="button" onclick="updateCalculations()" id="updateButton">Update</button>
-            
             <label class="switch">
                 <span class="slider">Adjust for Inflation 3%</span>
                 <input type="checkbox" id="inflationToggle">
             </label>
+        </br>
+    </br>
+        <!-- Investments vs Retirement -->
+    <div class="toggle-container" id="toggleContainer" onclick="toggleView()">
+        <div id="toggleIndicator" class="toggle-indicator investment">
+            Investments
+        </div>
+    </div>
 
         </div>
 
-            <!-- About Section -->
+        <!-- About Section -->
         <div class="card about-section">
           <div class="card-title">About</div>
           <div id="aboutsection" class="text-section">
@@ -357,12 +382,12 @@
             </p>
             <br>
             <p>
-                <strong>Monthly 401(k):</strong> Aim to contribute at least enough to get your employer’s full match—this (free money). If possible, target 10-15% of your salary to maximize long-term growth.
+                <strong>Monthly 401(k):</strong> Aim to contribute at least enough to get your employer’s full match (free money). If possible, target 10-15% of your salary to maximize long-term growth.
               </p>
               <p>
                 <strong>Yearly Roth IRA:</strong> Aim to contribute the maximum annual limit to take advantage of tax-free growth.
               </p>
-              <strong>Current Balance:</strong> This is the total amount you’ve already saved or invested, excluding your Roth IRA contributions, as this tool focuses on shorter-term investments such as a car or house.
+              <strong>Current Balance:</strong> This is the total amount you have saved or invested, excluding your Roth IRA contributions. This tool is primarily focused on shorter-term investments, such as buying a car or a house. If the Retirement toggle is enabled, your current balance will include the total of your 401(k) and Roth IRA contributions.
             </p>
             <p>
               <strong>Annual Return:</strong> The estimated percentage growth of your investment balance each year, estimate by historical stock market performance and interest rates.
@@ -373,14 +398,18 @@
             <p>
               <strong>Investment Goal:</strong> Short-term financial goal, such as home, car, vacation.
             </p>
-          </div>
+            <br>
+            <p>
+                <strong>Hint:</strong> To view only the Roth IRA or 401(k) growth, set the contribution of the account you wish to exclude to 0 and toggle the Investments button to switch to Retirement view.
+            </p>
         </div>
-        
     </div>
-    
+</div>
+
+ 
     <!-- Pie Chart Section -->
-       <div class="card chart-container" style="width: 190px; height: 225px;">
-       <div class="card-title">Monthly Breakdown</div>
+       <div class="card chart-container" style="width: 200px; height: 250px;">
+       <div class="card-title" style="margin-bottom:0;">Monthly Breakdown</div>
        <canvas id="incomePieChart"></canvas>
     </div>
 
@@ -388,23 +417,22 @@
         <div class="side-by-side" id="widgets">
             <!-- Yearly Progress -->
             <div class="card yearly-progress">
-                <div class="card-title">Invested Progress</div>
+                <div class="card-title" id="investedProgress">Invested Progress</div>
                 <div id="yearlyProgress"></div>
             </div>
 
             <!-- Chart Section -->
             <div class="card chart-container">
-                <div class="card-title">Invested Balance</div>
+                <div class="card-title" id="investedBalance">Invested Balance</div>
                 <canvas id="balanceChart"></canvas>
             </div>
 
-            
+
         </div>
-        
-        
+
         <!-- Results Section -->
         <div class="cards-grid">
-            
+
             <div class="card">
                 <div class="card-title">
                     <svg class="icon" viewBox="0 0 24 24">
@@ -454,7 +482,7 @@
             </div>
         </div>
 
-       
+
     </div>
 
 
@@ -482,6 +510,31 @@
         document.addEventListener('DOMContentLoaded', () => {
     loadSavedInputs(); // Load saved values on page load
 });
+
+
+let isInvestments = true; // Initial state
+
+function toggleView() {
+    isInvestments = !isInvestments; // Toggle the state
+    const toggleIndicator = document.getElementById('toggleIndicator');
+    const toggleContainer = document.getElementById('toggleContainer');
+
+    // Change indicator class and text based on current state
+    if (isInvestments) {
+        toggleIndicator.classList.remove('retirement');
+        toggleIndicator.classList.add('investment');
+        toggleIndicator.innerText = 'Investments';
+        toggleContainer.style.backgroundColor = 'rgb(201, 222, 228)';
+    } else {
+        toggleIndicator.classList.remove('investment');
+        toggleIndicator.classList.add('retirement');
+        toggleIndicator.innerText = 'Retirement';
+        toggleContainer.style.backgroundColor = '#bac3ff'; //Purple
+    }
+
+    // Call your update calculations function (if needed)
+    updateCalculations();
+}
 
 
 
@@ -525,6 +578,7 @@ document.querySelectorAll('.input-group input').forEach(input => {
 });
 
     let chart;
+    let pieChart
 
     // Function to calculate federal tax rate based on income brackets
     function calculateFederalTaxRate(annualIncome) {
@@ -573,6 +627,7 @@ document.querySelectorAll('.input-group input').forEach(input => {
         const stateTaxRate = parseFloat(document.getElementById('stateTaxRate').value) || 0;
         const goal = parseFloat(document.getElementById('goal').value) || 0;
         const inflationToggle = document.getElementById('inflationToggle').checked;
+        const isInvestmentsToggle = isInvestments
 
 
     // Calculate monthly gross income
@@ -596,12 +651,12 @@ document.querySelectorAll('.input-group input').forEach(input => {
         showNotification("Cannot be negative values");
         return;
     }
-    
+
     if (monthlyTakeHome < totalMonthlyExpenses) {
         showNotification("Your monthly take-home pay is not enough to cover your monthly expenses");
         return;
     }
-    
+
     // Proceed with calculations if validation passes
     // Constants
     const inflationRate = 0.03; // 3% inflation
@@ -611,26 +666,37 @@ document.querySelectorAll('.input-group input').forEach(input => {
     const monthlyReturn = Math.pow(1 + annualReturn / 100, 1 / 12) - 1;
     const monthlyAvailableForVoo = monthlyTakeHome - totalMonthlyExpenses;
     const monthlyRealReturn = Math.pow(1 + realReturn, 1 / 12) - 1;
-    
+
     let balance = currentBalance;
     let months = 0;
     const yearlyBalances = [];
     const chartData = {
         labels: [],
         datasets: [{
-            label: 'Balance Over Time',
+            label: 'Balance',
             data: [],
             borderColor: '#8fb6ab',
             backgroundColor: 'rgba(143, 182, 171, 0.2)',
         }],
     };
-    
+
     // Function to calculate inflation-adjusted value
     function adjustForInflation(value, years, inflationRate = 0.03) {
         return value / Math.pow(1 + inflationRate, years);
     }
 
+    // Investment Calculations
     let adjustedBalance = 0
+    let monthlyContributions = monthlyAvailableForVoo;
+
+    // Retirement View
+    if(!isInvestmentsToggle){
+        monthlyContributions = monthly401k + monthlyRothIra
+        document.getElementById('timeGoalText').textContent =
+        `Combined retirement savings`;
+        document.getElementById('investedProgress').textContent = `Retirement Progress`;
+        document.getElementById('investedBalance').textContent = `Retirement Balance`;
+    }
     while (adjustedBalance <= goal && months <= 1200) {
         if (months % 12 === 0) {
             // Adjust balance for inflation if the toggle is enabled
@@ -644,7 +710,7 @@ document.querySelectorAll('.input-group input').forEach(input => {
         }
 
         // Adjust monthly contributions for inflation if the toggle is enabled
-        const adjustedMonthlyContribution = inflationToggle ? adjustForInflation(monthlyAvailableForVoo, months / 12) : monthlyAvailableForVoo;
+        const adjustedMonthlyContribution = inflationToggle ? adjustForInflation(monthlyContributions, months / 12) : monthlyContributions;
 
         // Calculate the new balance
         balance *= (1 + monthlyReturn);
@@ -655,7 +721,7 @@ document.querySelectorAll('.input-group input').forEach(input => {
 
     // Update UI elements
     document.getElementById('monthlyInvestment').textContent =
-        `$${monthlyAvailableForVoo.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+    `$${monthlyContributions.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 
     const yearsToGoal = Math.floor(months/12) || 0;
     document.getElementById('timeToGoal').textContent = `${yearsToGoal} years`;
@@ -751,20 +817,23 @@ document.querySelectorAll('.input-group input').forEach(input => {
     });
 
 
-
-    
-let pieChart;
+// Update the pie chart
+if (pieChart) {
+    pieChart.destroy();
+}
+const pieCtx = document.getElementById('incomePieChart').getContext('2d');
 
 // Prepare data for the pie chart
 const pieChartData = {
-    labels: ['Taxes', 'Roth', 'Expenses', 'Investments'],
+    labels: ['Taxes', 'Roth', 'Expenses', 'Investments', '401k'],
     datasets: [{
-        data: [monthlyTaxes, monthlyRothIra, totalMonthlyExpenses, monthlyAvailableForVoo],
+        data: [monthlyTaxes, monthlyRothIra, totalMonthlyExpenses, monthlyAvailableForVoo, monthly401k],
         backgroundColor: [
             '#a8d498', // Pastel green 1
             '#96d4bf', // Pastel green 2
             '#cced9f', // Pastel green 3
             '#98d6a2', // Pastel green 4
+            '#aed4d1', // Pastel green 5
         ],
         borderColor: [
             '#e0ffee', // Darker shade for border
@@ -772,12 +841,6 @@ const pieChartData = {
         borderWidth: 2,
     }],
 };
-
-// Update the pie chart
-if (pieChart) {
-    pieChart.destroy();
-}
-const pieCtx = document.getElementById('incomePieChart').getContext('2d');
 
 // Create the chart instance
 pieChart = new Chart(pieCtx, {
@@ -800,12 +863,12 @@ pieChart = new Chart(pieCtx, {
                 callbacks: {
                     label: function (context) {
                         let label = `$${Math.round(context.raw)}`; // Percentage
-                        return label; 
+                        return label;
                     },
                 },
             },
             datalabels: {
-                color: '#375c47', 
+                color: '#375c47',
                 font: {
                     size: 12, // Adjust font size for labels
                     weight: 'bold', // Make labels bold
