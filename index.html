@@ -325,8 +325,12 @@
                     <input type="number" id="hoursPerWeek" value="40">
                 </div>
                 <div class="input-group">
-                    <label for="monthly401k">Monthly 401k:</label>
-                    <input type="number" id="monthly401k" value="2000">
+                    <label for="monthly401k">Monthly 401k (%):</label>
+                    <input type="number" id="monthly401k" value="15">
+                </div>
+                <div class="input-group">
+                    <label for="employerMatch">Employer 401k Match (%):</label>
+                    <input type="number" id="employerMatch" value="6">
                 </div>
                 <div class="input-group">
                     <label for="yearlyRothIra">Yearly Roth IRA:</label>
@@ -618,7 +622,8 @@ document.querySelectorAll('.input-group input').forEach(input => {
         // Get user inputs
         const hourlyWage = parseFloat(document.getElementById('hourlyWage').value) || 0;
         const hoursPerWeek = parseFloat(document.getElementById('hoursPerWeek').value) || 0;
-        const monthly401k = parseFloat(document.getElementById('monthly401k').value) || 0;
+        const monthly401kPercent = parseFloat(document.getElementById('monthly401k').value) || 0;
+        const employerMatch = parseFloat(document.getElementById('employerMatch').value) || 0;
         const yearlyRothIra = parseFloat(document.getElementById('yearlyRothIra').value) || 0;
         const monthlyRent = parseFloat(document.getElementById('monthlyRent').value) || 0;
         const monthlyExtra = parseFloat(document.getElementById('monthlyExtra').value) || 0;
@@ -635,6 +640,9 @@ document.querySelectorAll('.input-group input').forEach(input => {
     const annualGrossIncome = monthlyGrossIncome * 12;
 
     // Validate if salary is enough to cover expenses
+    let employee401k =  monthlyGrossIncome * (monthly401kPercent/100);
+    const monthly401k = employee401k + (employee401k * (employerMatch/100));
+
     const monthlyRothIra = yearlyRothIra / 12;
     const monthlyTaxableIncome = monthlyGrossIncome - monthly401k;
     const taxRate = 0.24;
@@ -649,6 +657,10 @@ document.querySelectorAll('.input-group input').forEach(input => {
     if (hourlyWage < 0 || hoursPerWeek < 0 || monthly401k < 0 || yearlyRothIra < 0 || monthlyRent < 0 || monthlyExtra < 0
         || currentBalance < 0 || annualReturn < 0 || annualReturn > 100 || goal < 0) {
         showNotification("Cannot be negative values");
+        return;
+    }
+    if ( monthly401kPercent > 100 || employerMatch > 100 || stateTaxRate > 100) {
+        showNotification("Cannot be above 100%");
         return;
     }
 
