@@ -702,13 +702,20 @@ document.querySelectorAll('.input-group input').forEach(input => {
     let monthlyContributions = monthlyAvailableForVoo;
 
     // Retirement View
-    if(!isInvestmentsToggle){
+    if(isInvestmentsToggle){
+        document.getElementById('timeGoalText').textContent =
+        `Available for investing`;
+        document.getElementById('investedProgress').textContent = `Invested Progress`;
+        document.getElementById('investedBalance').textContent = `Invested Balance`;
+    }else{
         monthlyContributions = monthly401k + monthlyRothIra
         document.getElementById('timeGoalText').textContent =
         `Combined retirement savings`;
         document.getElementById('investedProgress').textContent = `Retirement Progress`;
         document.getElementById('investedBalance').textContent = `Retirement Balance`;
+
     }
+
     while (adjustedBalance <= goal && months <= 1200) {
         if (months % 12 === 0) {
             // Adjust balance for inflation if the toggle is enabled
